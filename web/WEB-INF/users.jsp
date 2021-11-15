@@ -98,7 +98,7 @@
                                 <td>${item.email}</td>
                                 <td>${item.firstName}</td>
                                 <td>${item.lastName}</td>
-                                <td>${item.roleS}</td>
+                                <td>${item.getRole().getRoleName()}</td>
                                 <td>
 
                                     <a href="<c:url value='users'>

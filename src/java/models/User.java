@@ -5,38 +5,42 @@
  */
 package models;
 
-import java.util.List;
-import services.RoleService;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  *
  * @author WebChaiQuan
  */
+@Entity
 public class User {
+    @Id
     private String email;
+    
     private String firstName;
+    
     private String lastName;
+    
     private String password;
-    private int role;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roleId")
+    private Role role;
+    
     private boolean status;
-    private String roleS;
 
-
-   
-
-
-
+    public User() {}
     
-    public User(String email,String firstName,String lastName,String password,int role, boolean status) throws Exception{
-    this.email=email;
-    this.firstName=firstName;
-    this.lastName=lastName;
-    this.password=password;
-    this.role=role;
-    this.status=status;
-    setRoleS();
-    
-    
+    public User(String email,String firstName,String lastName,String password, Role role, boolean status) {
+        this.email=email;
+        this.firstName=firstName;
+        this.lastName=lastName;
+        this.password=password;
+        this.role = role;
+        this.status=status;
     }
     public String getEmail() {
         return email;
@@ -70,11 +74,11 @@ public class User {
         this.password = password;
     }
 
-    public int getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(int role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -85,23 +89,4 @@ public class User {
     public void setStatus(boolean status) {
         this.status = status;
     }
-    
-        public String getRoleS() {
-        return roleS;
-    }
-
- 
-
-    public void setRoleS() throws Exception{
-        RoleService roleService=new RoleService();
-        List<Role> roles = roleService.getAll();
-        String roleS = "Not defined in database";
-        for (int i = 0; i < roles.size(); i++) {
-            if (this.getRole() == roles.get(i).getRoleN()) {
-                roleS= roles.get(i).getRole();
-            }
-        }
-        this.roleS=roleS;
-    
-}
 }

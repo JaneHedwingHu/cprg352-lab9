@@ -14,11 +14,12 @@ import models.Role;
  * @author WebChaiQuan
  */
 public class RoleService {
-    
-    private RoleDB roleDB=new RoleDB();
-    public List<Role> getAll() throws Exception{
-    
-    return roleDB.getAll();
+
+    public static List<Role> getAll() throws Exception{
+        return RoleDB.getAll();
     }
     
+    public static Role getRoleFromName(String roleName) {
+        return RoleDB.getRoleByName(roleName);
+    }
 }

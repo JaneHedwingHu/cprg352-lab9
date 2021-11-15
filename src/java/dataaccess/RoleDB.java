@@ -5,47 +5,46 @@
  */
 package dataaccess;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import models.Role;
-import models.User;
 
 /**
  *
- * @author WebChaiQuan
+ * @author jinwe
  */
 public class RoleDB {
-     public List<Role> getAll() throws Exception {
-        List<Role> roles = new ArrayList<>();
-        ConnectionPool cp = ConnectionPool.getInstance();
-        Connection con = cp.getConnection();
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        
-        String sql = "SELECT * FROM role;";
+    public static Role getRoleById(long roleId) {
+        EntityManager em = DBUtil.getFactory().createEntityManager();
+        try {
+            Role role = em.find(Role.class, roleId);
+            return role;
+        } finally {
+            em.close();
+        }
+    }
+    
+    public static List<Role> getAll() {
+                EntityManager em = DBUtil.getFactory().createEntityManager();
+        try {
+            return em.createNamedQuery("Role.findAll").getResultList();
+        } finally {
+            em.close();
+        }
+    }
+    
+    public static Role getRoleByName(String roleName) {
+        EntityManager em = DBUtil.getFactory().createEntityManager();
+        String qString = "Select r FROM Role r WHERE r.roleName = :roleName";
+        TypedQuery<Role> q = em.createQuery(qString, Role.class);
+        q.setParameter("roleName", roleName);
         
         try {
-            ps = con.prepareStatement(sql);
-            //ps.setString(1, owner);
-            rs = ps.executeQuery();
-            while (rs.next()) {
-                
-                int roleN = rs.getInt(1);
-           
-                String role=rs.getString(2);
-           
-                Role theRole = new Role(roleN,role);
-                roles.add(theRole);
-            }
+            Role role = q.getSingleResult();
+            return role;
         } finally {
-            DBUtil.closeResultSet(rs);
-            DBUtil.closePreparedStatement(ps);
-            cp.freeConnection(con);
+            em.close();
         }
-
-        return roles;
     }
 }

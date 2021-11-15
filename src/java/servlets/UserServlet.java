@@ -12,7 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import models.Role;
 import models.User;
+import services.RoleService;
 import services.UserService;
 
 /**
@@ -25,35 +27,33 @@ public class UserServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         HttpSession session = request.getSession();
-        UserService userService = new UserService();
 
         if (request.getParameterMap().containsKey("action")) {
             String action = request.getParameter("action");
             String email = request.getParameter("email");
 
             try {
-                User user = userService.get(email);
-
+                User user = UserService.get(email);
                 if (action.equals("edit")) {
                     request.setAttribute("email", user.getEmail());
                     request.setAttribute("status", user.isStatus());
                     request.setAttribute("fistName", user.getFirstName());
                     request.setAttribute("lastName", user.getLastName());
                     request.setAttribute("password", user.getPassword());
-                    request.setAttribute("role", userService.getRoleString(user));
+                    request.setAttribute("role", user.getRole().getRoleId());
 
                     session.setAttribute("previousEmail", user.getEmail());
-                    List<User> userList = userService.getAll();
+                    List<User> userList = UserService.getAll();
 
                     request.setAttribute("userList", userList);
-                    request.setAttribute("roleN", user.getRole());
+                    request.setAttribute("roleN", user.getRole().getRoleId());
 
                     getServletContext().getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response);
                     return;
                 }
                 if (action.equals("delete")) {
-                    userService.delete(email);
-                    List<User> userList = userService.getAll();
+                    UserService.delete(email);
+                    List<User> userList = UserService.getAll();
 
                     request.setAttribute("userList", userList);
                     getServletContext().getRequestDispatcher("/WEB-INF/users.jsp").forward(request, response);
@@ -65,7 +65,7 @@ public class UserServlet extends HttpServlet {
         } else {
 
             try {
-                List<User> userList = userService.getAll();
+                List<User> userList = UserService.getAll();
 
                 request.setAttribute("userList", userList);
 
@@ -84,7 +84,6 @@ public class UserServlet extends HttpServlet {
 
         HttpSession session = request.getSession();
 
-        UserService userService = new UserService();
         String action = request.getParameter("action");
         
         List<User> userList = null;
@@ -104,10 +103,11 @@ public class UserServlet extends HttpServlet {
                     status = false;
                 }
                 String roleS = request.getParameter("role");
-                int roleN = userService.getRoleNumber(roleS);
-                User user = new User(emailNew, firstName, lastName, password, roleN, status);
+                Role role = RoleService.getRoleFromName(roleS);
+                
+                User user = new User(emailNew, firstName, lastName, password, role, status);
                 if (emailNew == null || emailNew.trim().equals("")) {
-                    userList = userService.getAll();
+                    userList = UserService.getAll();
                     request.setAttribute("userList", userList);
                     request.setAttribute("error", "the email address cannot be null or empty");
                     request.setAttribute("errorExist", true);
@@ -132,12 +132,12 @@ public class UserServlet extends HttpServlet {
 
                 }*/ 
                 
-                userList = userService.getAll();
+                userList = UserService.getAll();
 
                 request.setAttribute("userList", userList);
                 try {
-                    userService.insert(user);
-                     userList = userService.getAll();
+                    UserService.insert(user);
+                    userList = UserService.getAll();
 
                 request.setAttribute("userList", userList);
                 } catch (SQLException e) {
@@ -169,11 +169,11 @@ public class UserServlet extends HttpServlet {
                     statusE = false;
                 }
                 String roleSE = request.getParameter("roleE");
-                int roleNE = userService.getRoleNumber(roleSE);
-                User user = new User(emailNewE, firstNameE, lastNameE, passwordE, roleNE, statusE);
+                Role roleE = RoleService.getRoleFromName(roleSE);
+                User user = new User(emailNewE, firstNameE, lastNameE, passwordE, roleE, statusE);
 
                 if (previousEmailE.equals(emailNewE) == false) {
-                    userList = userService.getAll();
+                    userList = UserService.getAll();
                     request.setAttribute("userList", userList);
                     request.setAttribute("error", "the email address cannot be changed");
                     request.setAttribute("errorExist", true);
@@ -181,8 +181,8 @@ public class UserServlet extends HttpServlet {
                     return;
 
                 }
-                userService.update(previousEmailE, user);
-                userList = userService.getAll();
+                UserService.update(previousEmailE, user);
+                userList = UserService.getAll();
                 request.setAttribute("userList", userList);
 
                 request.setAttribute("userList", userList);
